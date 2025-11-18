@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     APP_DEBUG: bool = True
     SERVER_TITLE: str = "AI horoscope API"
     SERVER_DESCRIPTION: str = "API for cislenka.cz application"
-    SERVER_VERSION: str = "0.1.0"
+    SERVER_VERSION: str = "0.1.1"
     LOG_LEVEL: str = "DEBUG"
     PROJECTS_DIR: str = "project_data"
     CORS_ALLOW_ORIGINS: list[str] = Field(
