@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 7777:7777
+      - ${PORT:-7777}:7777
     environment:
       - MONGO_DB_URL=${MONGO_DB_URL:-host.docker.internal:27017}
       - MONGO_DB_NAME=${MONGO_DB_NAME:-ai_horoscop_db}
