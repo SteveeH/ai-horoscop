@@ -1,0 +1,19 @@
+services:
+  api-cislenka:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 7777:7777
+    environment:
+      - MONGO_DB_URL=${MONGO_DB_URL:-host.docker.internal:27017}
+      - MONGO_DB_NAME=${MONGO_DB_NAME:-ai_horoscop_db}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOTENBERG_API_URL=${GOTENBERG_API_URL}
+      - GOTENBERG_AUTH_USERNAME=${GOTENBERG_AUTH_USERNAME}
+      - GOTENBERG_AUTH_PASSWORD=${GOTENBERG_AUTH_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7777/status/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
