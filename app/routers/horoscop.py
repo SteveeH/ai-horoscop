@@ -53,7 +53,15 @@ async def create_horoscope_pdf(
         raise HTTPException(status_code=400, detail=llm_result.error)
 
     # Process html and generate PDF
-    html_content = generate_html(llm_result.model_dump(exclude_none=True))
+    html_content = generate_html(
+        {
+            **llm_result.model_dump(exclude_none=True),
+            "zodiac_cz": (
+                llm_result.zodiac.get_czech_name() if llm_result.zodiac else "Unknown"
+            ),
+        },
+        template_name="basic_template.html",
+    )
     pdf_content = await generate_pdf(html_content)
     end_time = datetime.now()
 
