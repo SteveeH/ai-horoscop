@@ -1,9 +1,9 @@
-import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
@@ -53,7 +53,13 @@ app.add_middleware(
 app.include_router(status_router)
 app.include_router(api_router)
 
+
 # Mount static files
+@app.get("/")
+async def serve_index():
+    return FileResponse("app/static/index.html")
+
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 if __name__ == "__main__":

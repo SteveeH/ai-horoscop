@@ -289,7 +289,9 @@ function horoscopeApp() {
       // Create filename with name and current date
       const date = new Date();
       const dateStr = date.toISOString().split("T")[0];
-      const filename = `horoscope_${this.formData.name.trim()}_${dateStr}.pdf`;
+      const filename = `horoscope_${this.formData.name
+        .replace(" ", "_")
+        .trim()}_${dateStr}.pdf`;
 
       // Encode filename to UTF-8
       link.setAttribute("download", filename);
@@ -432,9 +434,7 @@ function horoscopeApp() {
         this.showWarningNotification("Prosím zadejte Vaše datum narození");
       } else if (!this.isValidDateFormat(dob)) {
         this.errors.dob = "Neplatný formát data. Použijte DD.MM.YYYY.";
-        this.showWarningNotification(
-          "Neplatný formát. Použijte DD.MM.YYYY"
-        );
+        this.showWarningNotification("Neplatný formát. Použijte DD.MM.YYYY");
       } else if (!this.isValidDate(dob)) {
         this.errors.dob = "Zadejte platné datum narození.";
         this.showWarningNotification("Datum je neplatné nebo v budoucnosti");

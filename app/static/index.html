@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ČísLenka - Generátor Horoskopů</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
@@ -132,11 +132,7 @@
                   </div>
                 </div>
               </div>
-              <input
-                type="hidden"
-                id="dob"
-                x-model="formData.dob"
-              />
+              <input type="hidden" id="dob" x-model="formData.dob" />
               <p class="help-text">Zadejte den, měsíc a rok svého narození</p>
               <p
                 x-show="errors.dob"
@@ -304,12 +300,12 @@
             class="github-link"
             title="Prohlédněte si projekt na GitHubu"
           >
-            <img src="github.svg" alt="GitHub" />
+            <img src="/static/github.svg" alt="GitHub" />
           </a>
         </div>
       </footer>
     </div>
 
-    <script src="app.js"></script>
+    <script src="/static/app.js"></script>
   </body>
 </html>
