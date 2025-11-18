@@ -78,17 +78,66 @@
 
             <!-- Date of Birth Input -->
             <div class="form-group">
-              <label for="dob" class="label">Datum narození</label>
+              <label class="label">Datum narození</label>
+              <div class="date-picker-wrapper">
+                <div class="date-input-group">
+                  <div class="date-input-field">
+                    <label for="dob-day" class="date-label">Den</label>
+                    <input
+                      type="number"
+                      id="dob-day"
+                      x-model.number="dobDay"
+                      @change="updateDateOfBirth"
+                      min="1"
+                      max="31"
+                      placeholder="DD"
+                      class="date-input"
+                    />
+                  </div>
+                  <div class="date-input-field">
+                    <label for="dob-month" class="date-label">Měsíc</label>
+                    <select
+                      id="dob-month"
+                      x-model.number="dobMonth"
+                      @change="updateDateOfBirth"
+                      class="date-input date-select"
+                    >
+                      <option value="">Měsíc</option>
+                      <option value="1">Leden</option>
+                      <option value="2">Únor</option>
+                      <option value="3">Březen</option>
+                      <option value="4">Duben</option>
+                      <option value="5">Květen</option>
+                      <option value="6">Červen</option>
+                      <option value="7">Červenec</option>
+                      <option value="8">Srpen</option>
+                      <option value="9">Září</option>
+                      <option value="10">Říjen</option>
+                      <option value="11">Listopad</option>
+                      <option value="12">Prosinec</option>
+                    </select>
+                  </div>
+                  <div class="date-input-field">
+                    <label for="dob-year" class="date-label">Rok</label>
+                    <input
+                      type="number"
+                      id="dob-year"
+                      x-model.number="dobYear"
+                      @change="updateDateOfBirth"
+                      min="1900"
+                      max="2024"
+                      placeholder="YYYY"
+                      class="date-input"
+                    />
+                  </div>
+                </div>
+              </div>
               <input
-                type="text"
+                type="hidden"
                 id="dob"
                 x-model="formData.dob"
-                @blur="validateDobField"
-                placeholder="DD.MM.YYYY"
-                class="input"
-                required
               />
-              <p class="help-text">Formát: DD.MM.YYYY (např. 15.03.1990)</p>
+              <p class="help-text">Zadejte den, měsíc a rok svého narození</p>
               <p
                 x-show="errors.dob"
                 class="error-message"

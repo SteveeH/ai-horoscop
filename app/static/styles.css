@@ -213,7 +213,8 @@ body::before {
 }
 
 .github-link:hover img {
-  filter: invert(0.2) brightness(1.2) drop-shadow(0 0 5px rgba(0, 212, 255, 0.5));
+  filter: invert(0.2) brightness(1.2)
+    drop-shadow(0 0 5px rgba(0, 212, 255, 0.5));
 }
 
 /* ============================================================================
@@ -296,6 +297,94 @@ body::before {
 
 .input::placeholder {
   color: var(--text-tertiary);
+}
+
+/* ============================================================================
+   Date Picker Styles
+   ============================================================================ */
+.date-picker-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+.date-input-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.date-input-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.date-input {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: var(--radius-md);
+  background: rgba(42, 48, 80, 0.5);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* Remove spinner arrows from number input */
+.date-input::-webkit-outer-spin-button,
+.date-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.date-input:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  background: rgba(42, 48, 80, 0.7);
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(42, 48, 80, 0.8);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.date-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 20px;
+  padding-right: 32px;
+}
+
+@media (max-width: 480px) {
+  .date-input-group {
+    gap: 6px;
+  }
+
+  .date-input {
+    padding: var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+
+  .date-label {
+    font-size: 0.7rem;
+  }
 }
 
 .help-text {
@@ -736,7 +825,11 @@ body::before {
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-md);
-  background: linear-gradient(135deg, rgba(26, 31, 58, 0.95) 0%, rgba(42, 48, 80, 0.85) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 31, 58, 0.95) 0%,
+    rgba(42, 48, 80, 0.85) 100%
+  );
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: var(--radius-md);
@@ -835,7 +928,11 @@ body::before {
 }
 
 .notification-info .notification-progress-bar {
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+  background: linear-gradient(
+    90deg,
+    var(--primary-color),
+    var(--primary-light)
+  );
 }
 
 /* Mobile notifications */

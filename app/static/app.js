@@ -28,6 +28,11 @@ function horoscopeApp() {
       code: "",
     },
 
+    // Date of birth fields
+    dobDay: "",
+    dobMonth: "",
+    dobYear: "",
+
     // Notifications
     notifications: [],
     notificationIdCounter: 0,
@@ -449,6 +454,35 @@ function horoscopeApp() {
       } else if (code.length < 3) {
         this.errors.code = "Přístupový kód je příliš krátký.";
         this.showWarningNotification("Přístupový kód je příliš krátký");
+      }
+    },
+
+    /**
+     * Update date of birth from day, month, year inputs
+     */
+    updateDateOfBirth() {
+      if (this.dobDay && this.dobMonth && this.dobYear) {
+        // Format: DD.MM.YYYY
+        const day = String(this.dobDay).padStart(2, "0");
+        const month = String(this.dobMonth).padStart(2, "0");
+        this.formData.dob = `${day}.${month}.${this.dobYear}`;
+        // Validate the date after changing
+        this.validateDobField();
+      } else if (!this.dobDay && !this.dobMonth && !this.dobYear) {
+        // Clear if all fields are empty
+        this.formData.dob = "";
+      }
+    },
+
+    /**
+     * Initialize date picker fields from formData.dob
+     */
+    initializeDatePickerFields() {
+      if (this.formData.dob) {
+        const [day, month, year] = this.formData.dob.split(".");
+        this.dobDay = parseInt(day, 10);
+        this.dobMonth = parseInt(month, 10);
+        this.dobYear = parseInt(year, 10);
       }
     },
   };
