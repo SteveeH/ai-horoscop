@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
 from app.config import DB_NAMES, SERVER_SETTINGS
@@ -51,6 +52,9 @@ app.add_middleware(
 # Include the API routers
 app.include_router(status_router)
 app.include_router(api_router)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 if __name__ == "__main__":
     uvicorn.run(

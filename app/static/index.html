@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ČísLenka - Generátor Horoskopů</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+  </head>
+  <body>
+    <div class="container" x-data="horoscopeApp()" @htmx:load="initApp()">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1 class="title">✨ ČísLenka ✨</h1>
+          <p class="subtitle">Váš personalizovaný statistický horoskop</p>
+        </div>
+      </header>
+
+      <!-- Notifications Container -->
+      <div class="notifications-container">
+        <template x-for="notification in notifications" :key="notification.id">
+          <div
+            :class="[
+              'notification',
+              `notification-${notification.type}`
+            ]"
+            x-show="notification.visible"
+            @click="removeNotification(notification.id)"
+          >
+            <div class="notification-icon">
+              <span x-show="notification.type === 'success'">✓</span>
+              <span x-show="notification.type === 'error'">✕</span>
+              <span x-show="notification.type === 'warning'">!</span>
+              <span x-show="notification.type === 'info'">ℹ</span>
+            </div>
+            <div class="notification-content">
+              <p class="notification-message" x-text="notification.message"></p>
+            </div>
+            <div class="notification-progress">
+              <div
+                class="notification-progress-bar"
+                :style="{
+                  'animation-duration': notification.duration + 'ms'
+                }"
+              ></div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Form Section -->
+        <div class="form-section" :class="{'hidden': isLoading}">
+          <form @submit.prevent="submitForm" class="form">
+            <!-- Name Input -->
+            <div class="form-group">
+              <label for="name" class="label">Jméno</label>
+              <input
+                type="text"
+                id="name"
+                x-model="formData.name"
+                @blur="validateNameField"
+                placeholder="Zadejte Vaše jméno"
+                class="input"
+                required
+              />
+              <p
+                x-show="errors.name"
+                class="error-message"
+                x-text="errors.name"
+              ></p>
+            </div>
+
+            <!-- Date of Birth Input -->
+            <div class="form-group">
+              <label for="dob" class="label">Datum narození</label>
+              <input
+                type="text"
+                id="dob"
+                x-model="formData.dob"
+                @blur="validateDobField"
+                placeholder="DD.MM.YYYY"
+                class="input"
+                required
+              />
+              <p class="help-text">Formát: DD.MM.YYYY (např. 15.03.1990)</p>
+              <p
+                x-show="errors.dob"
+                class="error-message"
+                x-text="errors.dob"
+              ></p>
+            </div>
+
+            <!-- Access Code Input -->
+            <div class="form-group">
+              <label for="code" class="label">Přístupový kód</label>
+              <input
+                type="password"
+                id="code"
+                x-model="formData.code"
+                @blur="validateCodeField"
+                placeholder="Zadejte přístupový kód"
+                class="input"
+                required
+              />
+              <p
+                x-show="errors.code"
+                class="error-message"
+                x-text="errors.code"
+              ></p>
+            </div>
+
+            <!-- Horoscope Type Selection -->
+            <div class="form-group">
+              <label class="label">Typ horoskopu</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="basic"
+                    name="horoscope_type"
+                    value="HoroscopeBasic"
+                    x-model="formData.horoscope_type"
+                    class="radio-input"
+                  />
+                  <label for="basic" class="radio-label">Základní</label>
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="profi"
+                    name="horoscope_type"
+                    value="HoroscopeProfi"
+                    x-model="formData.horoscope_type"
+                    class="radio-input"
+                  />
+                  <label for="profi" class="radio-label">Profesionální</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Type Information -->
+            <div class="type-info" x-show="formData.horoscope_type">
+              <div
+                x-show="formData.horoscope_type === 'HoroscopeBasic'"
+                class="info-content"
+              >
+                <h3>Základní horoskop obsahuje:</h3>
+                <ul class="info-list">
+                  <li>Obecné předpovědi pro měsíc</li>
+                  <li>Analýzu osobnosti podle znamení</li>
+                  <li>Doporučení pro zdraví a wellness</li>
+                  <li>Počet sekcí: 4-6</li>
+                </ul>
+              </div>
+              <div
+                x-show="formData.horoscope_type === 'HoroscopeProfi'"
+                class="info-content"
+              >
+                <h3>Profesionální horoskop obsahuje:</h3>
+                <ul class="info-list">
+                  <li>Detailní astrologickou analýzu</li>
+                  <li>Hloubkový rozbor osobnosti</li>
+                  <li>Předpovědi v různých oblastech života</li>
+                  <li>Numerologické poznatky</li>
+                  <li>Praktické rady a doporučení</li>
+                  <li>Počet sekcí: 8-10</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn" :disabled="isLoading">
+              <span x-show="!isLoading">Vygenerovat horoskop</span>
+              <span x-show="isLoading" class="spinner"></span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Loading Section -->
+        <div class="loading-section" x-show="isLoading">
+          <div class="loading-content">
+            <div class="animation-container">
+              <div class="stars">
+                <div class="star star-1"></div>
+                <div class="star star-2"></div>
+                <div class="star star-3"></div>
+                <div class="star star-4"></div>
+                <div class="star star-5"></div>
+              </div>
+              <div class="orbiting-elements">
+                <div class="element element-1"></div>
+                <div class="element element-2"></div>
+                <div class="element element-3"></div>
+              </div>
+            </div>
+            <h2 class="loading-title">Váš horoskop se vygeneruje</h2>
+            <p class="loading-message">
+              Prosím počkejte, vesmír odhaluje vaši budoucnost...
+            </p>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                :style="{width: loadingProgress + '%'}"
+              ></div>
+            </div>
+            <p class="progress-text" x-text="loadingProgress + '%'"></p>
+          </div>
+        </div>
+
+        <!-- Success Section -->
+        <div class="success-section" x-show="showSuccess">
+          <div class="success-content">
+            <div class="success-icon">✓</div>
+            <h2 class="success-title">Horoskop je připraven!</h2>
+            <p class="success-message">
+              Váš personalizovaný horoskop byl úspěšně vygenerován. Stáhněte si
+              svou kosmickou budoucnost.
+            </p>
+            <div class="button-group">
+              <button @click="downloadPDF" class="download-btn">
+                📥 Stáhnout PDF
+              </button>
+              <button @click="resetForm" class="reset-btn">
+                ↻ Vygenerovat nový horoskop
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" x-show="showError">
+          <div class="error-content">
+            <div class="error-icon">✕</div>
+            <h2 class="error-title">Chyba při generování</h2>
+            <p class="error-message" x-text="errorMessage"></p>
+            <button @click="resetForm" class="reset-btn">↻ Zkusit znovu</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <p>&copy; 2025 ČísLenka. Veškeré předpovědi jsou pouze pro zábavu.</p>
+          <a
+            href="https://github.com/SteveeH/ai-horoscop"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="github-link"
+            title="Prohlédněte si projekt na GitHubu"
+          >
+            <img src="github.svg" alt="GitHub" />
+          </a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
