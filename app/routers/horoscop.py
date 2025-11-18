@@ -57,9 +57,7 @@ async def create_horoscope_pdf(
     pdf_content = await generate_pdf(html_content)
     end_time = datetime.now()
 
-    filename = (
-        f"{user_input.name}_{start_time.strftime("%Y-%m-%d_%H:%M:%S")}_horoskop.pdf"
-    )
+    filename = f"{user_input.name.replace(" ","_")}_{start_time.strftime("%Y-%m-%d_%H:%M:%S")}_horoskop.pdf"
 
     # Store PDF to MongoDB gridfs
     fs = AsyncIOMotorGridFSBucket(db, bucket_name=DB_NAMES.HOROSCOPES_PDF)
