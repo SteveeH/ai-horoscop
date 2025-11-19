@@ -63,19 +63,31 @@ async def generate_content_gemini(
     for attempt in range(SERVER_SETTINGS.REQUEST_RETRY_COUNT):
         try:
             async with session.post(
-                f"{SERVER_SETTINGS.GEMINI_API_URL}?key={SERVER_SETTINGS.GEMINI_API_KEY}",
-                headers={"Content-Type": "application/json"},
+                SERVER_SETTINGS.GEMINI_API_URL,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": SERVER_SETTINGS.GEMINI_API_KEY,
+                },
                 json={
                     "contents": [{"parts": [{"text": user_prompt}]}],
-                    "tools": [{"google_search": {}}],
+                    "tools": [],  # "tools": [{"google_search": {}}],
                     "systemInstruction": {"parts": [{"text": SYSTEM_PROMPT}]},
                     "generationConfig": {
                         "candidateCount": 1,
                     },
                 },
             ) as response:
-                response.raise_for_status()
                 data: dict = await response.json()
+
+                if response.status != 200:
+                    response_preview = json.dumps(data, indent=2, ensure_ascii=False)[
+                        :200
+                    ]
+                    logger.error(
+                        f"Gemini API error for key '{key}': Status {response.status}. "
+                        f"Response: {response_preview}"
+                    )
+                    response.raise_for_status()
 
                 """ with open(
                     f"debug_response_{key}_{datetime.now().strftime("%d.%m.%Y_%H:%M:%S")}.json",
@@ -104,13 +116,31 @@ async def generate_content_gemini(
                 )
 
         except aiohttp.ClientResponseError as err:
+            # Try to get response body for better debugging
+            response_body = ""
+            try:
+                response_body = await err.history[0].text() if err.history else ""
+            except Exception:
+                response_body = f"(unable to read response body)"
+
             if (
-                err.status in {500, 503}
+                err.status in {404, 429, 500, 503}
                 and attempt < SERVER_SETTINGS.REQUEST_RETRY_COUNT - 1
             ):
                 delay = 2**attempt
                 await asyncio.sleep(delay)
+                logger.warning(
+                    f"Generation for key '{key}' failed with status {err.status}. "
+                    f"Response: {response_body[:200] if response_body else 'N/A'}. "
+                    f"Retrying in {delay} seconds..."
+                )
+                continue
+
             else:
+                logger.error(
+                    f"Generation for key '{key}' failed with status {err.status}. "
+                    f"Error: {err}. Response body: {response_body}"
+                )
                 raise err
         finally:
             time_end = datetime.now()
@@ -172,6 +202,52 @@ async def generate_all_outputs(state: HoroscopeState) -> HoroscopeState:
     return state
 
 
+async def generate_all_outputs_one_by_one(state: HoroscopeState) -> HoroscopeState:
+
+    logger.debug("Starting sequential generation of outputs.")
+
+    prompts_to_run = state.horoscope_type.get_prompts()
+
+    if not prompts_to_run:
+        state.error = "Neznámý typ horoskopu."
+        return state
+
+    base_prompt = BASE_PROMPT_TEMPLATE.format(
+        name=state.name,
+        dob=state.dob,
+        astro_number=state.astro_number,
+        zodiac=state.zodiac.get_czech_name() if state.zodiac else "Unknown",
+    )
+
+    async with aiohttp.ClientSession() as session:
+        results: List[ContentResponse] = []
+        for key, data in prompts_to_run.items():
+            full_prompt = f"{base_prompt} {data.prompt}"
+            res = await generate_content_gemini(session, key, full_prompt)
+            results.append(res)
+
+        # Collect results
+        for key, response in zip(prompts_to_run.keys(), results):
+
+            if response.error is not None:
+                error_msg = (
+                    f"Error in generating response for key {key}: {response.error}"
+                )
+                if state.error is None:
+                    state.error = error_msg
+                else:
+                    state.error += f"\n{error_msg}"
+
+                continue
+
+            response.title = prompts_to_run[key].title
+            state.results.append(response)
+            state.total_input_tokens += response.input_tokens
+            state.total_output_tokens += response.output_tokens
+
+    return state
+
+
 def should_continue(state: HoroscopeState) -> str:
     return "end" if state.error else "continue"
 
@@ -179,7 +255,8 @@ def should_continue(state: HoroscopeState) -> str:
 workflow = StateGraph(HoroscopeState)
 workflow.add_node("validate", input_validator)
 workflow.add_node("enrich", enrich_state)
-workflow.add_node("generate_outputs", generate_all_outputs)
+# workflow.add_node("generate_outputs", generate_all_outputs)
+workflow.add_node("generate_outputs", generate_all_outputs_one_by_one)
 workflow.set_entry_point("validate")
 workflow.add_conditional_edges(
     "validate", should_continue, {"continue": "enrich", "end": END}
