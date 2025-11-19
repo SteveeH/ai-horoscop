@@ -23,19 +23,25 @@ async def create_horoscope_pdf(
 
     start_time = datetime.now()
     # check validation code if exists
-
     db_validation_code = await db[DB_NAMES.ACCESS_CODES].find_one_and_update(
         {"code": user_input.code}, {"$set": {"lastUsed": start_time}}
     )
 
     if not db_validation_code:
-        raise HTTPException(status_code=400, detail="Invalid validation code")
+        raise HTTPException(status_code=400, detail="Nevalidní přístupový kód.")
 
-    llm_result = await run_horoscope_flow(
-        name=user_input.name,
-        dob=user_input.dob,
-        horoscope_type=user_input.horoscope_type,
-    )
+    try:
+        llm_result = await run_horoscope_flow(
+            name=user_input.name,
+            dob=user_input.dob,
+            horoscope_type=user_input.horoscope_type,
+        )
+    except Exception as e:
+        logger.error(f"Error during horoscope generation: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Hvězdy momentálně nepřejí. Zkuste to prosím později.",
+        )
     """
     llm_result = debug_llm_result()
     """
