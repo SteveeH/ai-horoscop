@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     MONGO_DB_URL: str = "mongodb://localhost:27017"
 
     GEMINI_API_URL: str = (
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent"
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
     )
     GEMINI_API_KEY: str = "your_api_key_here"
     REQUEST_RETRY_COUNT: int = 5

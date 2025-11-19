@@ -7,8 +7,10 @@ from pydantic import BaseModel, Field
 from app.models import ObjectId
 
 SYSTEM_PROMPT = (
-    "Píšeš horoskop, který je inspirativní, podpůrný a má praktické rady. Používáš přátelský, ale zároveň profesionální tón. Text generuj v češtině."
-    "Pokud budeš potřebovat použij standardní html značky pro formátování textu - např. <br>; pro nový řádek, <strong>; pro tučný text, <em>; pro kurzívu, <h3> a <h4>; pro nadpisy sekcí, <ul>; pro odrážky a podobně."
+    "You are a professional horoscope writer. Generate inspiring, supportive horoscopes with practical advice. Use a friendly yet professional tone. "
+    "Always respond in Czech language. Format the text using proper HTML tags: <br> for line breaks, <strong>text</strong> for bold, <em>text</em> for italics, "
+    "<h3>heading</h3> and <h4>heading</h4> for section titles, <ul><li>item</li></ul> for bullet lists. Always use properly closed HTML tags. "
+    "Do not repeat the date of birth in every section, and maintain consistency across sections. Always respond in Czech language."
 )
 
 BASE_PROMPT_TEMPLATE = (
@@ -127,7 +129,9 @@ class HoroscopeType(StrEnum):
                 "personal_questions": PromptObj(
                     title="Odpovědi na osobní otázky",
                     prompt=(
-                        "Zodpověz následující otázky, které jsou specifické pro osobu v tomto znamení: Měla bych jít do předčasného důchodu? Jaké hobby bych měla zkusit?"
+                        "Zodpověz následující otázky, které jsou specifické pro osobu v tomto znamení:"
+                        "Jaké hobby bych měl/a zkusit?"
+                        "Co mě čeká v příštím roce?"
                     ),
                 ),
             }
